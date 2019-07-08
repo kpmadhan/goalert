@@ -16,6 +16,7 @@ import ScheduleCalendarQuery from './ScheduleCalendarQuery'
 import { urlParamSelector } from '../selectors'
 import { resetURLParams, setURLParam } from '../actions'
 import { connect } from 'react-redux'
+import { DateTime } from 'luxon'
 
 const query = gql`
   query($id: ID!) {
@@ -40,6 +41,12 @@ const partialQuery = gql`
 const mapStateToProps = state => ({
   userFilter: urlParamSelector(state)('userFilter', []),
   activeOnly: urlParamSelector(state)('activeOnly', false),
+  start: urlParamSelector(state)(
+    'start',
+    DateTime.fromObject({ zone: 'local' })
+      .startOf('day')
+      .toISO(),
+  ),
 })
 
 const mapDispatchToProps = dispatch => {
