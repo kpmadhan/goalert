@@ -109,9 +109,17 @@ const mapDispatchToProps = dispatch => {
     setActiveOnly: value => dispatch(setURLParam('activeOnly', value)),
     setDuration: value => dispatch(setURLParam('duration', value, 'P14D')),
     setStart: value => dispatch(setURLParam('start', value)),
+    setEnd: value => dispatch(setURLParam('end', value)),
     resetFilter: () =>
       dispatch(
-        resetURLParams('userFilter', 'start', 'activeOnly', 'tz', 'duration'),
+        resetURLParams(
+          'userFilter',
+          'start',
+          'activeOnly',
+          'tz',
+          'duration',
+          'end',
+        ),
       ),
   }
 }
@@ -225,6 +233,12 @@ export default class ScheduleShiftList extends React.PureComponent {
     })
 
     return result
+  }
+
+  componentWillMount() {
+    this.props.setStart(String(DateTime.timeNow), this.props.zone)
+    this.props.setEnd(this.props.start + String(this.props.duration))
+    console.log(this.props.end)
   }
 
   renderDurationSelector() {
