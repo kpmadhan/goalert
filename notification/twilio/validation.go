@@ -80,9 +80,9 @@ func validSID(n string) string {
 }
 
 // Supported Country Codes
-// +1 = USA, +91 = India, +44 = United Kingdom
+// +1 = USA, +91 = India, +44 = United Kingdom , +61 = Australia
 func supportedCountryCode(n string) bool {
-	if strings.HasPrefix(n, "+1") || strings.HasPrefix(n, "+91") || strings.HasPrefix(n, "+44") {
+	if strings.HasPrefix(n, "+1") || strings.HasPrefix(n, "+91") || strings.HasPrefix(n, "+44") || strings.HasPrefix(n, "+61") {
 		return true
 	}
 	return false
