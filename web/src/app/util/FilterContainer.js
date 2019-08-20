@@ -12,6 +12,10 @@ import { FilterList } from '@material-ui/icons'
 
 const style = theme => {
   return {
+    actions: {
+      display: 'flex',
+      justifyContent: 'flex-end',
+    },
     overflow: {
       overflow: 'visible',
     },
@@ -35,7 +39,7 @@ export default class FilterContainer extends React.PureComponent {
 
   renderContent() {
     return (
-      <Grid item container spacing={3} className={this.props.classes.container}>
+      <Grid container spacing={2} className={this.props.classes.container}>
         <Grid
           item
           container
@@ -45,11 +49,17 @@ export default class FilterContainer extends React.PureComponent {
         >
           {this.props.children}
         </Grid>
-        <Grid item container justify='flex-end' xs={12}>
+        <Grid item xs={12} className={this.props.classes.actions}>
           {this.props.onReset && (
             <Button onClick={this.props.onReset}>Reset</Button>
           )}
-          <Button onClick={() => this.setState({ anchorEl: null })}>
+          <Button
+            onClick={() =>
+              this.setState({
+                anchorEl: null,
+              })
+            }
+          >
             Done
           </Button>
         </Grid>
@@ -62,7 +72,13 @@ export default class FilterContainer extends React.PureComponent {
       <React.Fragment>
         <IconButton
           color='inherit'
-          onClick={e => this.setState({ anchorEl: e.target })}
+          onClick={e =>
+            this.setState({
+              anchorEl: e.target,
+            })
+          }
+          title='filter'
+          aria-expanded={Boolean(this.state.anchorEl)}
         >
           <FilterList />
         </IconButton>
@@ -73,7 +89,11 @@ export default class FilterContainer extends React.PureComponent {
               paper: classes.overflow,
             }}
             open={!!this.state.anchorEl}
-            onClose={() => this.setState({ anchorEl: null })}
+            onClose={() =>
+              this.setState({
+                anchorEl: null,
+              })
+            }
             anchorOrigin={{
               vertical: 'bottom',
               horizontal: 'right',
@@ -95,7 +115,11 @@ export default class FilterContainer extends React.PureComponent {
             disableDiscovery
             disableSwipeToOpen
             open={!!this.state.anchorEl}
-            onClose={() => this.setState({ anchorEl: null })}
+            onClose={() =>
+              this.setState({
+                anchorEl: null,
+              })
+            }
             onOpen={() => {}}
           >
             {this.renderContent()}

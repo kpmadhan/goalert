@@ -30,6 +30,9 @@ const styles = theme => ({
     [theme.breakpoints.up('md')]: { float: 'left' },
     margin: 20,
   },
+  mainHeading: {
+    fontSize: '1.5rem',
+  },
 })
 
 const mapStateToProps = state => {
@@ -120,17 +123,29 @@ export default class DetailsPage extends React.PureComponent {
       classes,
     } = this.props
     return (
-      <Grid item container>
+      <Grid container>
         <Grid item xs={12} className={classes.spacing}>
           <Card>
             <CardContent>
               {icon && <div className={classes.iconContainer}>{icon}</div>}
-              <Typography variant='h5'>{title}</Typography>
-              <Typography name='details' variant='subtitle1'>
+              <Typography
+                data-cy='details-heading'
+                className={classes.mainHeading}
+                component='h2'
+              >
+                {title}
+              </Typography>
+              <Typography data-cy='details' variant='subtitle1' component='div'>
                 <Markdown value={details} />
               </Typography>
               {titleFooter && (
-                <Typography variant='subtitle1'>{titleFooter}</Typography>
+                <Typography
+                  component='div'
+                  variant='subtitle1'
+                  data-cy='title-footer'
+                >
+                  {titleFooter}
+                </Typography>
               )}
             </CardContent>
           </Card>

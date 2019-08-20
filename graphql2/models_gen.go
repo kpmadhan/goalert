@@ -87,6 +87,12 @@ type CreateEscalationPolicyStepInput struct {
 	NewSchedule        *CreateScheduleInput   `json:"newSchedule"`
 }
 
+type CreateHeartbeatMonitorInput struct {
+	ServiceID      string `json:"serviceID"`
+	Name           string `json:"name"`
+	TimeoutMinutes int    `json:"timeoutMinutes"`
+}
+
 type CreateIntegrationKeyInput struct {
 	ServiceID *string            `json:"serviceID"`
 	Type      IntegrationKeyType `json:"type"`
@@ -108,17 +114,19 @@ type CreateScheduleInput struct {
 	Name        string                `json:"name"`
 	Description *string               `json:"description"`
 	TimeZone    string                `json:"timeZone"`
+	Favorite    *bool                 `json:"favorite"`
 	Targets     []ScheduleTargetInput `json:"targets"`
 }
 
 type CreateServiceInput struct {
-	Name                string                       `json:"name"`
-	Description         *string                      `json:"description"`
-	Favorite            *bool                        `json:"favorite"`
-	EscalationPolicyID  *string                      `json:"escalationPolicyID"`
-	NewEscalationPolicy *CreateEscalationPolicyInput `json:"newEscalationPolicy"`
-	NewIntegrationKeys  []CreateIntegrationKeyInput  `json:"newIntegrationKeys"`
-	Labels              []SetLabelInput              `json:"labels"`
+	Name                 string                        `json:"name"`
+	Description          *string                       `json:"description"`
+	Favorite             *bool                         `json:"favorite"`
+	EscalationPolicyID   *string                       `json:"escalationPolicyID"`
+	NewEscalationPolicy  *CreateEscalationPolicyInput  `json:"newEscalationPolicy"`
+	NewIntegrationKeys   []CreateIntegrationKeyInput   `json:"newIntegrationKeys"`
+	Labels               []SetLabelInput               `json:"labels"`
+	NewHeartbeatMonitors []CreateHeartbeatMonitorInput `json:"newHeartbeatMonitors"`
 }
 
 type CreateUserContactMethodInput struct {
@@ -200,10 +208,12 @@ type ScheduleRuleInput struct {
 }
 
 type ScheduleSearchOptions struct {
-	First  *int     `json:"first"`
-	After  *string  `json:"after"`
-	Search *string  `json:"search"`
-	Omit   []string `json:"omit"`
+	First          *int     `json:"first"`
+	After          *string  `json:"after"`
+	Search         *string  `json:"search"`
+	Omit           []string `json:"omit"`
+	FavoritesOnly  *bool    `json:"favoritesOnly"`
+	FavoritesFirst *bool    `json:"favoritesFirst"`
 }
 
 type ScheduleTarget struct {
@@ -217,6 +227,10 @@ type ScheduleTargetInput struct {
 	Target      *assignment.RawTarget `json:"target"`
 	NewRotation *CreateRotationInput  `json:"newRotation"`
 	Rules       []ScheduleRuleInput   `json:"rules"`
+}
+
+type SendContactMethodVerificationInput struct {
+	ContactMethodID string `json:"contactMethodID"`
 }
 
 type ServiceConnection struct {
@@ -289,6 +303,12 @@ type UpdateEscalationPolicyStepInput struct {
 	ID           string                 `json:"id"`
 	DelayMinutes *int                   `json:"delayMinutes"`
 	Targets      []assignment.RawTarget `json:"targets"`
+}
+
+type UpdateHeartbeatMonitorInput struct {
+	ID             string  `json:"id"`
+	Name           *string `json:"name"`
+	TimeoutMinutes *int    `json:"timeoutMinutes"`
 }
 
 type UpdateRotationInput struct {
@@ -366,6 +386,11 @@ type UserSearchOptions struct {
 	After  *string  `json:"after"`
 	Search *string  `json:"search"`
 	Omit   []string `json:"omit"`
+}
+
+type VerifyContactMethodInput struct {
+	ContactMethodID string `json:"contactMethodID"`
+	Code            int    `json:"code"`
 }
 
 type AlertStatus string

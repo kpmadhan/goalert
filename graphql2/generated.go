@@ -16,6 +16,7 @@ import (
 	"github.com/target/goalert/alert/log"
 	"github.com/target/goalert/assignment"
 	"github.com/target/goalert/escalation"
+	"github.com/target/goalert/heartbeat"
 	"github.com/target/goalert/integrationkey"
 	"github.com/target/goalert/label"
 	"github.com/target/goalert/notification/slack"
@@ -54,6 +55,7 @@ type ResolverRoot interface {
 	AlertLogEntry() AlertLogEntryResolver
 	EscalationPolicy() EscalationPolicyResolver
 	EscalationPolicyStep() EscalationPolicyStepResolver
+	HeartbeatMonitor() HeartbeatMonitorResolver
 	IntegrationKey() IntegrationKeyResolver
 	Mutation() MutationResolver
 	OnCallShift() OnCallShiftResolver
@@ -64,6 +66,7 @@ type ResolverRoot interface {
 	Service() ServiceResolver
 	Target() TargetResolver
 	User() UserResolver
+	UserContactMethod() UserContactMethodResolver
 	UserNotificationRule() UserNotificationRuleResolver
 	UserOverride() UserOverrideResolver
 }
@@ -148,6 +151,16 @@ type ComplexityRoot struct {
 		Targets          func(childComplexity int) int
 	}
 
+	HeartbeatMonitor struct {
+		Href           func(childComplexity int) int
+		ID             func(childComplexity int) int
+		LastHeartbeat  func(childComplexity int) int
+		LastState      func(childComplexity int) int
+		Name           func(childComplexity int) int
+		ServiceID      func(childComplexity int) int
+		TimeoutMinutes func(childComplexity int) int
+	}
+
 	IntegrationKey struct {
 		Href      func(childComplexity int) int
 		ID        func(childComplexity int) int
@@ -167,34 +180,38 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		AddAuthSubject             func(childComplexity int, input user.AuthSubject) int
-		CreateAlert                func(childComplexity int, input CreateAlertInput) int
-		CreateEscalationPolicy     func(childComplexity int, input CreateEscalationPolicyInput) int
-		CreateEscalationPolicyStep func(childComplexity int, input CreateEscalationPolicyStepInput) int
-		CreateIntegrationKey       func(childComplexity int, input CreateIntegrationKeyInput) int
-		CreateRotation             func(childComplexity int, input CreateRotationInput) int
-		CreateSchedule             func(childComplexity int, input CreateScheduleInput) int
-		CreateService              func(childComplexity int, input CreateServiceInput) int
-		CreateUserContactMethod    func(childComplexity int, input CreateUserContactMethodInput) int
-		CreateUserNotificationRule func(childComplexity int, input CreateUserNotificationRuleInput) int
-		CreateUserOverride         func(childComplexity int, input CreateUserOverrideInput) int
-		DeleteAll                  func(childComplexity int, input []assignment.RawTarget) int
-		DeleteAuthSubject          func(childComplexity int, input user.AuthSubject) int
-		EscalateAlerts             func(childComplexity int, input []int) int
-		SetConfig                  func(childComplexity int, input []ConfigValueInput) int
-		SetFavorite                func(childComplexity int, input SetFavoriteInput) int
-		SetLabel                   func(childComplexity int, input SetLabelInput) int
-		TestContactMethod          func(childComplexity int, id string) int
-		UpdateAlerts               func(childComplexity int, input UpdateAlertsInput) int
-		UpdateEscalationPolicy     func(childComplexity int, input UpdateEscalationPolicyInput) int
-		UpdateEscalationPolicyStep func(childComplexity int, input UpdateEscalationPolicyStepInput) int
-		UpdateRotation             func(childComplexity int, input UpdateRotationInput) int
-		UpdateSchedule             func(childComplexity int, input UpdateScheduleInput) int
-		UpdateScheduleTarget       func(childComplexity int, input ScheduleTargetInput) int
-		UpdateService              func(childComplexity int, input UpdateServiceInput) int
-		UpdateUser                 func(childComplexity int, input UpdateUserInput) int
-		UpdateUserContactMethod    func(childComplexity int, input UpdateUserContactMethodInput) int
-		UpdateUserOverride         func(childComplexity int, input UpdateUserOverrideInput) int
+		AddAuthSubject                func(childComplexity int, input user.AuthSubject) int
+		CreateAlert                   func(childComplexity int, input CreateAlertInput) int
+		CreateEscalationPolicy        func(childComplexity int, input CreateEscalationPolicyInput) int
+		CreateEscalationPolicyStep    func(childComplexity int, input CreateEscalationPolicyStepInput) int
+		CreateHeartbeatMonitor        func(childComplexity int, input CreateHeartbeatMonitorInput) int
+		CreateIntegrationKey          func(childComplexity int, input CreateIntegrationKeyInput) int
+		CreateRotation                func(childComplexity int, input CreateRotationInput) int
+		CreateSchedule                func(childComplexity int, input CreateScheduleInput) int
+		CreateService                 func(childComplexity int, input CreateServiceInput) int
+		CreateUserContactMethod       func(childComplexity int, input CreateUserContactMethodInput) int
+		CreateUserNotificationRule    func(childComplexity int, input CreateUserNotificationRuleInput) int
+		CreateUserOverride            func(childComplexity int, input CreateUserOverrideInput) int
+		DeleteAll                     func(childComplexity int, input []assignment.RawTarget) int
+		DeleteAuthSubject             func(childComplexity int, input user.AuthSubject) int
+		EscalateAlerts                func(childComplexity int, input []int) int
+		SendContactMethodVerification func(childComplexity int, input SendContactMethodVerificationInput) int
+		SetConfig                     func(childComplexity int, input []ConfigValueInput) int
+		SetFavorite                   func(childComplexity int, input SetFavoriteInput) int
+		SetLabel                      func(childComplexity int, input SetLabelInput) int
+		TestContactMethod             func(childComplexity int, id string) int
+		UpdateAlerts                  func(childComplexity int, input UpdateAlertsInput) int
+		UpdateEscalationPolicy        func(childComplexity int, input UpdateEscalationPolicyInput) int
+		UpdateEscalationPolicyStep    func(childComplexity int, input UpdateEscalationPolicyStepInput) int
+		UpdateHeartbeatMonitor        func(childComplexity int, input UpdateHeartbeatMonitorInput) int
+		UpdateRotation                func(childComplexity int, input UpdateRotationInput) int
+		UpdateSchedule                func(childComplexity int, input UpdateScheduleInput) int
+		UpdateScheduleTarget          func(childComplexity int, input ScheduleTargetInput) int
+		UpdateService                 func(childComplexity int, input UpdateServiceInput) int
+		UpdateUser                    func(childComplexity int, input UpdateUserInput) int
+		UpdateUserContactMethod       func(childComplexity int, input UpdateUserContactMethodInput) int
+		UpdateUserOverride            func(childComplexity int, input UpdateUserOverrideInput) int
+		VerifyContactMethod           func(childComplexity int, input VerifyContactMethodInput) int
 	}
 
 	OnCallShift struct {
@@ -217,6 +234,7 @@ type ComplexityRoot struct {
 		Config                  func(childComplexity int, all *bool) int
 		EscalationPolicies      func(childComplexity int, input *EscalationPolicySearchOptions) int
 		EscalationPolicy        func(childComplexity int, id string) int
+		HeartbeatMonitor        func(childComplexity int, id string) int
 		IntegrationKey          func(childComplexity int, id string) int
 		Labels                  func(childComplexity int, input *LabelSearchOptions) int
 		Rotation                func(childComplexity int, id string) int
@@ -259,6 +277,7 @@ type ComplexityRoot struct {
 		AssignedTo  func(childComplexity int) int
 		Description func(childComplexity int) int
 		ID          func(childComplexity int) int
+		IsFavorite  func(childComplexity int) int
 		Name        func(childComplexity int) int
 		Shifts      func(childComplexity int, start time.Time, end time.Time) int
 		Target      func(childComplexity int, input assignment.RawTarget) int
@@ -290,6 +309,7 @@ type ComplexityRoot struct {
 		Description        func(childComplexity int) int
 		EscalationPolicy   func(childComplexity int) int
 		EscalationPolicyID func(childComplexity int) int
+		HeartbeatMonitors  func(childComplexity int) int
 		ID                 func(childComplexity int) int
 		IntegrationKeys    func(childComplexity int) int
 		IsFavorite         func(childComplexity int) int
@@ -352,10 +372,12 @@ type ComplexityRoot struct {
 	}
 
 	UserContactMethod struct {
-		ID    func(childComplexity int) int
-		Name  func(childComplexity int) int
-		Type  func(childComplexity int) int
-		Value func(childComplexity int) int
+		Disabled       func(childComplexity int) int
+		FormattedValue func(childComplexity int) int
+		ID             func(childComplexity int) int
+		Name           func(childComplexity int) int
+		Type           func(childComplexity int) int
+		Value          func(childComplexity int) int
 	}
 
 	UserNotificationRule struct {
@@ -403,6 +425,11 @@ type EscalationPolicyStepResolver interface {
 	Targets(ctx context.Context, obj *escalation.Step) ([]assignment.RawTarget, error)
 	EscalationPolicy(ctx context.Context, obj *escalation.Step) (*escalation.Policy, error)
 }
+type HeartbeatMonitorResolver interface {
+	TimeoutMinutes(ctx context.Context, obj *heartbeat.Monitor) (int, error)
+
+	Href(ctx context.Context, obj *heartbeat.Monitor) (string, error)
+}
 type IntegrationKeyResolver interface {
 	Type(ctx context.Context, obj *integrationkey.IntegrationKey) (IntegrationKeyType, error)
 
@@ -427,6 +454,7 @@ type MutationResolver interface {
 	CreateEscalationPolicyStep(ctx context.Context, input CreateEscalationPolicyStepInput) (*escalation.Step, error)
 	CreateRotation(ctx context.Context, input CreateRotationInput) (*rotation.Rotation, error)
 	CreateIntegrationKey(ctx context.Context, input CreateIntegrationKeyInput) (*integrationkey.IntegrationKey, error)
+	CreateHeartbeatMonitor(ctx context.Context, input CreateHeartbeatMonitorInput) (*heartbeat.Monitor, error)
 	SetLabel(ctx context.Context, input SetLabelInput) (bool, error)
 	CreateSchedule(ctx context.Context, input CreateScheduleInput) (*schedule.Schedule, error)
 	UpdateScheduleTarget(ctx context.Context, input ScheduleTargetInput) (bool, error)
@@ -434,8 +462,11 @@ type MutationResolver interface {
 	CreateUserContactMethod(ctx context.Context, input CreateUserContactMethodInput) (*contactmethod.ContactMethod, error)
 	CreateUserNotificationRule(ctx context.Context, input CreateUserNotificationRuleInput) (*notificationrule.NotificationRule, error)
 	UpdateUserContactMethod(ctx context.Context, input UpdateUserContactMethodInput) (bool, error)
+	SendContactMethodVerification(ctx context.Context, input SendContactMethodVerificationInput) (bool, error)
+	VerifyContactMethod(ctx context.Context, input VerifyContactMethodInput) (bool, error)
 	UpdateSchedule(ctx context.Context, input UpdateScheduleInput) (bool, error)
 	UpdateUserOverride(ctx context.Context, input UpdateUserOverrideInput) (bool, error)
+	UpdateHeartbeatMonitor(ctx context.Context, input UpdateHeartbeatMonitorInput) (bool, error)
 	SetConfig(ctx context.Context, input []ConfigValueInput) (bool, error)
 }
 type OnCallShiftResolver interface {
@@ -448,6 +479,7 @@ type QueryResolver interface {
 	Alerts(ctx context.Context, input *AlertSearchOptions) (*AlertConnection, error)
 	Service(ctx context.Context, id string) (*service.Service, error)
 	IntegrationKey(ctx context.Context, id string) (*integrationkey.IntegrationKey, error)
+	HeartbeatMonitor(ctx context.Context, id string) (*heartbeat.Monitor, error)
 	Services(ctx context.Context, input *ServiceSearchOptions) (*ServiceConnection, error)
 	Rotation(ctx context.Context, id string) (*rotation.Rotation, error)
 	Rotations(ctx context.Context, input *RotationSearchOptions) (*RotationConnection, error)
@@ -481,6 +513,7 @@ type ScheduleResolver interface {
 	Shifts(ctx context.Context, obj *schedule.Schedule, start time.Time, end time.Time) ([]oncall.Shift, error)
 	Targets(ctx context.Context, obj *schedule.Schedule) ([]ScheduleTarget, error)
 	Target(ctx context.Context, obj *schedule.Schedule, input assignment.RawTarget) (*ScheduleTarget, error)
+	IsFavorite(ctx context.Context, obj *schedule.Schedule) (bool, error)
 }
 type ScheduleRuleResolver interface {
 	WeekdayFilter(ctx context.Context, obj *rule.Rule) ([]bool, error)
@@ -492,6 +525,7 @@ type ServiceResolver interface {
 	OnCallUsers(ctx context.Context, obj *service.Service) ([]oncall.ServiceOnCallUser, error)
 	IntegrationKeys(ctx context.Context, obj *service.Service) ([]integrationkey.IntegrationKey, error)
 	Labels(ctx context.Context, obj *service.Service) ([]label.Label, error)
+	HeartbeatMonitors(ctx context.Context, obj *service.Service) ([]heartbeat.Monitor, error)
 }
 type TargetResolver interface {
 	Name(ctx context.Context, obj *assignment.RawTarget) (*string, error)
@@ -504,6 +538,9 @@ type UserResolver interface {
 
 	AuthSubjects(ctx context.Context, obj *user.User) ([]user.AuthSubject, error)
 	OnCallSteps(ctx context.Context, obj *user.User) ([]escalation.Step, error)
+}
+type UserContactMethodResolver interface {
+	FormattedValue(ctx context.Context, obj *contactmethod.ContactMethod) (string, error)
 }
 type UserNotificationRuleResolver interface {
 	ContactMethod(ctx context.Context, obj *notificationrule.NotificationRule) (*contactmethod.ContactMethod, error)
@@ -835,6 +872,55 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.EscalationPolicyStep.Targets(childComplexity), true
 
+	case "HeartbeatMonitor.Href":
+		if e.complexity.HeartbeatMonitor.Href == nil {
+			break
+		}
+
+		return e.complexity.HeartbeatMonitor.Href(childComplexity), true
+
+	case "HeartbeatMonitor.ID":
+		if e.complexity.HeartbeatMonitor.ID == nil {
+			break
+		}
+
+		return e.complexity.HeartbeatMonitor.ID(childComplexity), true
+
+	case "HeartbeatMonitor.LastHeartbeat":
+		if e.complexity.HeartbeatMonitor.LastHeartbeat == nil {
+			break
+		}
+
+		return e.complexity.HeartbeatMonitor.LastHeartbeat(childComplexity), true
+
+	case "HeartbeatMonitor.LastState":
+		if e.complexity.HeartbeatMonitor.LastState == nil {
+			break
+		}
+
+		return e.complexity.HeartbeatMonitor.LastState(childComplexity), true
+
+	case "HeartbeatMonitor.Name":
+		if e.complexity.HeartbeatMonitor.Name == nil {
+			break
+		}
+
+		return e.complexity.HeartbeatMonitor.Name(childComplexity), true
+
+	case "HeartbeatMonitor.ServiceID":
+		if e.complexity.HeartbeatMonitor.ServiceID == nil {
+			break
+		}
+
+		return e.complexity.HeartbeatMonitor.ServiceID(childComplexity), true
+
+	case "HeartbeatMonitor.TimeoutMinutes":
+		if e.complexity.HeartbeatMonitor.TimeoutMinutes == nil {
+			break
+		}
+
+		return e.complexity.HeartbeatMonitor.TimeoutMinutes(childComplexity), true
+
 	case "IntegrationKey.Href":
 		if e.complexity.IntegrationKey.Href == nil {
 			break
@@ -945,6 +1031,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.CreateEscalationPolicyStep(childComplexity, args["input"].(CreateEscalationPolicyStepInput)), true
+
+	case "Mutation.CreateHeartbeatMonitor":
+		if e.complexity.Mutation.CreateHeartbeatMonitor == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createHeartbeatMonitor_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateHeartbeatMonitor(childComplexity, args["input"].(CreateHeartbeatMonitorInput)), true
 
 	case "Mutation.CreateIntegrationKey":
 		if e.complexity.Mutation.CreateIntegrationKey == nil {
@@ -1066,6 +1164,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.EscalateAlerts(childComplexity, args["input"].([]int)), true
 
+	case "Mutation.SendContactMethodVerification":
+		if e.complexity.Mutation.SendContactMethodVerification == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_sendContactMethodVerification_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.SendContactMethodVerification(childComplexity, args["input"].(SendContactMethodVerificationInput)), true
+
 	case "Mutation.SetConfig":
 		if e.complexity.Mutation.SetConfig == nil {
 			break
@@ -1150,6 +1260,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.UpdateEscalationPolicyStep(childComplexity, args["input"].(UpdateEscalationPolicyStepInput)), true
 
+	case "Mutation.UpdateHeartbeatMonitor":
+		if e.complexity.Mutation.UpdateHeartbeatMonitor == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateHeartbeatMonitor_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateHeartbeatMonitor(childComplexity, args["input"].(UpdateHeartbeatMonitorInput)), true
+
 	case "Mutation.UpdateRotation":
 		if e.complexity.Mutation.UpdateRotation == nil {
 			break
@@ -1233,6 +1355,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.UpdateUserOverride(childComplexity, args["input"].(UpdateUserOverrideInput)), true
+
+	case "Mutation.VerifyContactMethod":
+		if e.complexity.Mutation.VerifyContactMethod == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_verifyContactMethod_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.VerifyContactMethod(childComplexity, args["input"].(VerifyContactMethodInput)), true
 
 	case "OnCallShift.End":
 		if e.complexity.OnCallShift.End == nil {
@@ -1354,6 +1488,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.EscalationPolicy(childComplexity, args["id"].(string)), true
+
+	case "Query.HeartbeatMonitor":
+		if e.complexity.Query.HeartbeatMonitor == nil {
+			break
+		}
+
+		args, err := ec.field_Query_heartbeatMonitor_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.HeartbeatMonitor(childComplexity, args["id"].(string)), true
 
 	case "Query.IntegrationKey":
 		if e.complexity.Query.IntegrationKey == nil {
@@ -1671,6 +1817,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Schedule.ID(childComplexity), true
 
+	case "Schedule.IsFavorite":
+		if e.complexity.Schedule.IsFavorite == nil {
+			break
+		}
+
+		return e.complexity.Schedule.IsFavorite(childComplexity), true
+
 	case "Schedule.Name":
 		if e.complexity.Schedule.Name == nil {
 			break
@@ -1813,6 +1966,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Service.EscalationPolicyID(childComplexity), true
+
+	case "Service.HeartbeatMonitors":
+		if e.complexity.Service.HeartbeatMonitors == nil {
+			break
+		}
+
+		return e.complexity.Service.HeartbeatMonitors(childComplexity), true
 
 	case "Service.ID":
 		if e.complexity.Service.ID == nil {
@@ -2037,6 +2197,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.UserConnection.PageInfo(childComplexity), true
+
+	case "UserContactMethod.Disabled":
+		if e.complexity.UserContactMethod.Disabled == nil {
+			break
+		}
+
+		return e.complexity.UserContactMethod.Disabled(childComplexity), true
+
+	case "UserContactMethod.FormattedValue":
+		if e.complexity.UserContactMethod.FormattedValue == nil {
+			break
+		}
+
+		return e.complexity.UserContactMethod.FormattedValue(childComplexity), true
 
 	case "UserContactMethod.ID":
 		if e.complexity.UserContactMethod.ID == nil {
@@ -2266,6 +2440,9 @@ var parsedSchema = gqlparser.MustLoadSchema(
   # Returns a single integration key with the given ID.
   integrationKey(id: ID!): IntegrationKey
 
+  # Returns a heartbeat monitor with the given ID
+  heartbeatMonitor(id: ID!): HeartbeatMonitor
+
   # Returns a paginated list of services.
   services(input: ServiceSearchOptions): ServiceConnection!
 
@@ -2433,6 +2610,8 @@ type Mutation {
 
   createIntegrationKey(input: CreateIntegrationKeyInput!): IntegrationKey
 
+  createHeartbeatMonitor(input: CreateHeartbeatMonitorInput!): HeartbeatMonitor
+
   setLabel(input: SetLabelInput!): Boolean!
 
   createSchedule(input: CreateScheduleInput!): Schedule
@@ -2446,9 +2625,14 @@ type Mutation {
     input: CreateUserNotificationRuleInput!
   ): UserNotificationRule
   updateUserContactMethod(input: UpdateUserContactMethodInput!): Boolean!
+  sendContactMethodVerification(
+    input: SendContactMethodVerificationInput!
+  ): Boolean!
+  verifyContactMethod(input: VerifyContactMethodInput!): Boolean!
 
   updateSchedule(input: UpdateScheduleInput!): Boolean!
   updateUserOverride(input: UpdateUserOverrideInput!): Boolean!
+  updateHeartbeatMonitor(input: UpdateHeartbeatMonitorInput!): Boolean!
 
   setConfig(input: [ConfigValueInput!]): Boolean!
 }
@@ -2488,6 +2672,7 @@ input CreateScheduleInput {
   name: String!
   description: String
   timeZone: String!
+  favorite: Boolean
 
   targets: [ScheduleTargetInput!]
 }
@@ -2543,6 +2728,7 @@ input CreateServiceInput {
   newEscalationPolicy: CreateEscalationPolicyInput
   newIntegrationKeys: [CreateIntegrationKeyInput!]
   labels: [SetLabelInput!]
+  newHeartbeatMonitors: [CreateHeartbeatMonitorInput!]
 }
 
 input CreateEscalationPolicyInput {
@@ -2630,6 +2816,7 @@ type Schedule {
 
   targets: [ScheduleTarget!]!
   target(input: TargetInput!): ScheduleTarget
+  isFavorite: Boolean!
 }
 
 type OnCallShift {
@@ -2754,6 +2941,12 @@ input ScheduleSearchOptions {
   after: String = ""
   search: String = ""
   omit: [ID!]
+
+  # Include only favorited services in the results.
+  favoritesOnly: Boolean = false
+
+  # Sort favorite services first.
+  favoritesFirst: Boolean = false
 }
 
 input ServiceSearchOptions {
@@ -2843,12 +3036,41 @@ type Service {
   onCallUsers: [ServiceOnCallUser!]!
   integrationKeys: [IntegrationKey!]!
   labels: [Label!]!
+  heartbeatMonitors: [HeartbeatMonitor!]!
 }
 
 input CreateIntegrationKeyInput {
   serviceID: ID
   type: IntegrationKeyType!
   name: String!
+}
+
+input CreateHeartbeatMonitorInput {
+  serviceID: ID!
+  name: String!
+  timeoutMinutes: Int!
+}
+
+input UpdateHeartbeatMonitorInput {
+  id: ID!
+  name: String
+  timeoutMinutes: Int
+}
+
+enum HeartbeatMonitorState {
+  inactive
+  healthy
+  unhealthy
+}
+
+type HeartbeatMonitor {
+  id: ID!
+  serviceID: ID!
+  name: String!
+  timeoutMinutes: Int!
+  lastState: HeartbeatMonitorState!
+  lastHeartbeat: ISOTimestamp
+  href: String!
 }
 
 type Label {
@@ -2917,6 +3139,7 @@ enum TargetType {
   userOverride
   notificationRule
   contactMethod
+  heartbeatMonitor
 }
 
 type ServiceConnection {
@@ -2997,13 +3220,13 @@ enum ContactMethodType {
 # A method of contacting a user.
 type UserContactMethod {
   id: ID!
-
   type: ContactMethodType
 
   # User-defined label for this contact method.
   name: String!
-
   value: String!
+  formattedValue: String!
+  disabled: Boolean!
 }
 
 input CreateUserContactMethodInput {
@@ -3026,6 +3249,15 @@ input UpdateUserContactMethodInput {
 
   name: String
   value: String
+}
+
+input SendContactMethodVerificationInput {
+  contactMethodID: ID!
+}
+
+input VerifyContactMethodInput {
+  contactMethodID: ID!
+  code: Int!
 }
 
 type AuthSubject {
@@ -3102,6 +3334,20 @@ func (ec *executionContext) field_Mutation_createEscalationPolicy_args(ctx conte
 	var arg0 CreateEscalationPolicyInput
 	if tmp, ok := rawArgs["input"]; ok {
 		arg0, err = ec.unmarshalNCreateEscalationPolicyInput2githubᚗcomᚋtargetᚋgoalertᚋgraphql2ᚐCreateEscalationPolicyInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_createHeartbeatMonitor_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 CreateHeartbeatMonitorInput
+	if tmp, ok := rawArgs["input"]; ok {
+		arg0, err = ec.unmarshalNCreateHeartbeatMonitorInput2githubᚗcomᚋtargetᚋgoalertᚋgraphql2ᚐCreateHeartbeatMonitorInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -3250,6 +3496,20 @@ func (ec *executionContext) field_Mutation_escalateAlerts_args(ctx context.Conte
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_sendContactMethodVerification_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 SendContactMethodVerificationInput
+	if tmp, ok := rawArgs["input"]; ok {
+		arg0, err = ec.unmarshalNSendContactMethodVerificationInput2githubᚗcomᚋtargetᚋgoalertᚋgraphql2ᚐSendContactMethodVerificationInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_setConfig_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -3348,6 +3608,20 @@ func (ec *executionContext) field_Mutation_updateEscalationPolicy_args(ctx conte
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_updateHeartbeatMonitor_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 UpdateHeartbeatMonitorInput
+	if tmp, ok := rawArgs["input"]; ok {
+		arg0, err = ec.unmarshalNUpdateHeartbeatMonitorInput2githubᚗcomᚋtargetᚋgoalertᚋgraphql2ᚐUpdateHeartbeatMonitorInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_updateRotation_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -3438,6 +3712,20 @@ func (ec *executionContext) field_Mutation_updateUser_args(ctx context.Context, 
 	var arg0 UpdateUserInput
 	if tmp, ok := rawArgs["input"]; ok {
 		arg0, err = ec.unmarshalNUpdateUserInput2githubᚗcomᚋtargetᚋgoalertᚋgraphql2ᚐUpdateUserInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_verifyContactMethod_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 VerifyContactMethodInput
+	if tmp, ok := rawArgs["input"]; ok {
+		arg0, err = ec.unmarshalNVerifyContactMethodInput2githubᚗcomᚋtargetᚋgoalertᚋgraphql2ᚐVerifyContactMethodInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -3547,6 +3835,20 @@ func (ec *executionContext) field_Query_escalationPolicies_args(ctx context.Cont
 }
 
 func (ec *executionContext) field_Query_escalationPolicy_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["id"]; ok {
+		arg0, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_heartbeatMonitor_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
@@ -5049,6 +5351,192 @@ func (ec *executionContext) _EscalationPolicyStep_escalationPolicy(ctx context.C
 	return ec.marshalOEscalationPolicy2ᚖgithubᚗcomᚋtargetᚋgoalertᚋescalationᚐPolicy(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _HeartbeatMonitor_id(ctx context.Context, field graphql.CollectedField, obj *heartbeat.Monitor) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "HeartbeatMonitor",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _HeartbeatMonitor_serviceID(ctx context.Context, field graphql.CollectedField, obj *heartbeat.Monitor) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "HeartbeatMonitor",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ServiceID, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _HeartbeatMonitor_name(ctx context.Context, field graphql.CollectedField, obj *heartbeat.Monitor) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "HeartbeatMonitor",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _HeartbeatMonitor_timeoutMinutes(ctx context.Context, field graphql.CollectedField, obj *heartbeat.Monitor) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "HeartbeatMonitor",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.HeartbeatMonitor().TimeoutMinutes(rctx, obj)
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _HeartbeatMonitor_lastState(ctx context.Context, field graphql.CollectedField, obj *heartbeat.Monitor) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "HeartbeatMonitor",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.LastState(), nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(heartbeat.State)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNHeartbeatMonitorState2githubᚗcomᚋtargetᚋgoalertᚋheartbeatᚐState(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _HeartbeatMonitor_lastHeartbeat(ctx context.Context, field graphql.CollectedField, obj *heartbeat.Monitor) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "HeartbeatMonitor",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.LastHeartbeat(), nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOISOTimestamp2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _HeartbeatMonitor_href(ctx context.Context, field graphql.CollectedField, obj *heartbeat.Monitor) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "HeartbeatMonitor",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.HeartbeatMonitor().Href(rctx, obj)
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _IntegrationKey_id(ctx context.Context, field graphql.CollectedField, obj *integrationkey.IntegrationKey) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
@@ -5880,6 +6368,37 @@ func (ec *executionContext) _Mutation_createIntegrationKey(ctx context.Context, 
 	return ec.marshalOIntegrationKey2ᚖgithubᚗcomᚋtargetᚋgoalertᚋintegrationkeyᚐIntegrationKey(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Mutation_createHeartbeatMonitor(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_createHeartbeatMonitor_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateHeartbeatMonitor(rctx, args["input"].(CreateHeartbeatMonitorInput))
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*heartbeat.Monitor)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOHeartbeatMonitor2ᚖgithubᚗcomᚋtargetᚋgoalertᚋheartbeatᚐMonitor(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Mutation_setLabel(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
@@ -6106,6 +6625,74 @@ func (ec *executionContext) _Mutation_updateUserContactMethod(ctx context.Contex
 	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Mutation_sendContactMethodVerification(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_sendContactMethodVerification_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().SendContactMethodVerification(rctx, args["input"].(SendContactMethodVerificationInput))
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_verifyContactMethod(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_verifyContactMethod_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().VerifyContactMethod(rctx, args["input"].(VerifyContactMethodInput))
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Mutation_updateSchedule(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
@@ -6161,6 +6748,40 @@ func (ec *executionContext) _Mutation_updateUserOverride(ctx context.Context, fi
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().UpdateUserOverride(rctx, args["input"].(UpdateUserOverrideInput))
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_updateHeartbeatMonitor(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_updateHeartbeatMonitor_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdateHeartbeatMonitor(rctx, args["input"].(UpdateHeartbeatMonitorInput))
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -6581,6 +7202,37 @@ func (ec *executionContext) _Query_integrationKey(ctx context.Context, field gra
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalOIntegrationKey2ᚖgithubᚗcomᚋtargetᚋgoalertᚋintegrationkeyᚐIntegrationKey(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_heartbeatMonitor(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_heartbeatMonitor_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().HeartbeatMonitor(rctx, args["id"].(string))
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*heartbeat.Monitor)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOHeartbeatMonitor2ᚖgithubᚗcomᚋtargetᚋgoalertᚋheartbeatᚐMonitor(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_services(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
@@ -7776,6 +8428,33 @@ func (ec *executionContext) _Schedule_target(ctx context.Context, field graphql.
 	return ec.marshalOScheduleTarget2ᚖgithubᚗcomᚋtargetᚋgoalertᚋgraphql2ᚐScheduleTarget(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Schedule_isFavorite(ctx context.Context, field graphql.CollectedField, obj *schedule.Schedule) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "Schedule",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Schedule().IsFavorite(rctx, obj)
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _ScheduleConnection_nodes(ctx context.Context, field graphql.CollectedField, obj *ScheduleConnection) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
@@ -8311,6 +8990,33 @@ func (ec *executionContext) _Service_labels(ctx context.Context, field graphql.C
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalNLabel2ᚕgithubᚗcomᚋtargetᚋgoalertᚋlabelᚐLabel(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Service_heartbeatMonitors(ctx context.Context, field graphql.CollectedField, obj *service.Service) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "Service",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Service().HeartbeatMonitors(rctx, obj)
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]heartbeat.Monitor)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNHeartbeatMonitor2ᚕgithubᚗcomᚋtargetᚋgoalertᚋheartbeatᚐMonitor(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _ServiceConnection_nodes(ctx context.Context, field graphql.CollectedField, obj *ServiceConnection) graphql.Marshaler {
@@ -9115,6 +9821,60 @@ func (ec *executionContext) _UserContactMethod_value(ctx context.Context, field 
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _UserContactMethod_formattedValue(ctx context.Context, field graphql.CollectedField, obj *contactmethod.ContactMethod) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "UserContactMethod",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.UserContactMethod().FormattedValue(rctx, obj)
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _UserContactMethod_disabled(ctx context.Context, field graphql.CollectedField, obj *contactmethod.ContactMethod) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "UserContactMethod",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Disabled, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _UserNotificationRule_id(ctx context.Context, field graphql.CollectedField, obj *notificationrule.NotificationRule) graphql.Marshaler {
@@ -10565,6 +11325,36 @@ func (ec *executionContext) unmarshalInputCreateEscalationPolicyStepInput(ctx co
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputCreateHeartbeatMonitorInput(ctx context.Context, v interface{}) (CreateHeartbeatMonitorInput, error) {
+	var it CreateHeartbeatMonitorInput
+	var asMap = v.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "serviceID":
+			var err error
+			it.ServiceID, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "name":
+			var err error
+			it.Name, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "timeoutMinutes":
+			var err error
+			it.TimeoutMinutes, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputCreateIntegrationKeyInput(ctx context.Context, v interface{}) (CreateIntegrationKeyInput, error) {
 	var it CreateIntegrationKeyInput
 	var asMap = v.(map[string]interface{})
@@ -10683,6 +11473,12 @@ func (ec *executionContext) unmarshalInputCreateScheduleInput(ctx context.Contex
 			if err != nil {
 				return it, err
 			}
+		case "favorite":
+			var err error
+			it.Favorite, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "targets":
 			var err error
 			it.Targets, err = ec.unmarshalOScheduleTargetInput2ᚕgithubᚗcomᚋtargetᚋgoalertᚋgraphql2ᚐScheduleTargetInput(ctx, v)
@@ -10740,6 +11536,12 @@ func (ec *executionContext) unmarshalInputCreateServiceInput(ctx context.Context
 		case "labels":
 			var err error
 			it.Labels, err = ec.unmarshalOSetLabelInput2ᚕgithubᚗcomᚋtargetᚋgoalertᚋgraphql2ᚐSetLabelInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "newHeartbeatMonitors":
+			var err error
+			it.NewHeartbeatMonitors, err = ec.unmarshalOCreateHeartbeatMonitorInput2ᚕgithubᚗcomᚋtargetᚋgoalertᚋgraphql2ᚐCreateHeartbeatMonitorInput(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -11071,6 +11873,18 @@ func (ec *executionContext) unmarshalInputScheduleSearchOptions(ctx context.Cont
 			if err != nil {
 				return it, err
 			}
+		case "favoritesOnly":
+			var err error
+			it.FavoritesOnly, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "favoritesFirst":
+			var err error
+			it.FavoritesFirst, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		}
 	}
 
@@ -11104,6 +11918,24 @@ func (ec *executionContext) unmarshalInputScheduleTargetInput(ctx context.Contex
 		case "rules":
 			var err error
 			it.Rules, err = ec.unmarshalNScheduleRuleInput2ᚕgithubᚗcomᚋtargetᚋgoalertᚋgraphql2ᚐScheduleRuleInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputSendContactMethodVerificationInput(ctx context.Context, v interface{}) (SendContactMethodVerificationInput, error) {
+	var it SendContactMethodVerificationInput
+	var asMap = v.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "contactMethodID":
+			var err error
+			it.ContactMethodID, err = ec.unmarshalNID2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -11410,6 +12242,36 @@ func (ec *executionContext) unmarshalInputUpdateEscalationPolicyStepInput(ctx co
 		case "targets":
 			var err error
 			it.Targets, err = ec.unmarshalOTargetInput2ᚕgithubᚗcomᚋtargetᚋgoalertᚋassignmentᚐRawTarget(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputUpdateHeartbeatMonitorInput(ctx context.Context, v interface{}) (UpdateHeartbeatMonitorInput, error) {
+	var it UpdateHeartbeatMonitorInput
+	var asMap = v.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "id":
+			var err error
+			it.ID, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "name":
+			var err error
+			it.Name, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "timeoutMinutes":
+			var err error
+			it.TimeoutMinutes, err = ec.unmarshalOInt2ᚖint(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -11772,6 +12634,30 @@ func (ec *executionContext) unmarshalInputUserSearchOptions(ctx context.Context,
 		case "omit":
 			var err error
 			it.Omit, err = ec.unmarshalOID2ᚕstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputVerifyContactMethodInput(ctx context.Context, v interface{}) (VerifyContactMethodInput, error) {
+	var it VerifyContactMethodInput
+	var asMap = v.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "contactMethodID":
+			var err error
+			it.ContactMethodID, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "code":
+			var err error
+			it.Code, err = ec.unmarshalNInt2int(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -12345,6 +13231,78 @@ func (ec *executionContext) _EscalationPolicyStep(ctx context.Context, sel ast.S
 	return out
 }
 
+var heartbeatMonitorImplementors = []string{"HeartbeatMonitor"}
+
+func (ec *executionContext) _HeartbeatMonitor(ctx context.Context, sel ast.SelectionSet, obj *heartbeat.Monitor) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, heartbeatMonitorImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	invalid := false
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("HeartbeatMonitor")
+		case "id":
+			out.Values[i] = ec._HeartbeatMonitor_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "serviceID":
+			out.Values[i] = ec._HeartbeatMonitor_serviceID(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "name":
+			out.Values[i] = ec._HeartbeatMonitor_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "timeoutMinutes":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._HeartbeatMonitor_timeoutMinutes(ctx, field, obj)
+				if res == graphql.Null {
+					invalid = true
+				}
+				return res
+			})
+		case "lastState":
+			out.Values[i] = ec._HeartbeatMonitor_lastState(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "lastHeartbeat":
+			out.Values[i] = ec._HeartbeatMonitor_lastHeartbeat(ctx, field, obj)
+		case "href":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._HeartbeatMonitor_href(ctx, field, obj)
+				if res == graphql.Null {
+					invalid = true
+				}
+				return res
+			})
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
 var integrationKeyImplementors = []string{"IntegrationKey"}
 
 func (ec *executionContext) _IntegrationKey(ctx context.Context, sel ast.SelectionSet, obj *integrationkey.IntegrationKey) graphql.Marshaler {
@@ -12555,6 +13513,8 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec._Mutation_createRotation(ctx, field)
 		case "createIntegrationKey":
 			out.Values[i] = ec._Mutation_createIntegrationKey(ctx, field)
+		case "createHeartbeatMonitor":
+			out.Values[i] = ec._Mutation_createHeartbeatMonitor(ctx, field)
 		case "setLabel":
 			out.Values[i] = ec._Mutation_setLabel(ctx, field)
 			if out.Values[i] == graphql.Null {
@@ -12578,6 +13538,16 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
+		case "sendContactMethodVerification":
+			out.Values[i] = ec._Mutation_sendContactMethodVerification(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "verifyContactMethod":
+			out.Values[i] = ec._Mutation_verifyContactMethod(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "updateSchedule":
 			out.Values[i] = ec._Mutation_updateSchedule(ctx, field)
 			if out.Values[i] == graphql.Null {
@@ -12585,6 +13555,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			}
 		case "updateUserOverride":
 			out.Values[i] = ec._Mutation_updateUserOverride(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "updateHeartbeatMonitor":
+			out.Values[i] = ec._Mutation_updateHeartbeatMonitor(ctx, field)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
@@ -12771,6 +13746,17 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_integrationKey(ctx, field)
+				return res
+			})
+		case "heartbeatMonitor":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_heartbeatMonitor(ctx, field)
 				return res
 			})
 		case "services":
@@ -13255,6 +14241,20 @@ func (ec *executionContext) _Schedule(ctx context.Context, sel ast.SelectionSet,
 				res = ec._Schedule_target(ctx, field, obj)
 				return res
 			})
+		case "isFavorite":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Schedule_isFavorite(ctx, field, obj)
+				if res == graphql.Null {
+					invalid = true
+				}
+				return res
+			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -13498,6 +14498,20 @@ func (ec *executionContext) _Service(ctx context.Context, sel ast.SelectionSet, 
 					}
 				}()
 				res = ec._Service_labels(ctx, field, obj)
+				if res == graphql.Null {
+					invalid = true
+				}
+				return res
+			})
+		case "heartbeatMonitors":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Service_heartbeatMonitors(ctx, field, obj)
 				if res == graphql.Null {
 					invalid = true
 				}
@@ -13918,6 +14932,25 @@ func (ec *executionContext) _UserContactMethod(ctx context.Context, sel ast.Sele
 			}
 		case "value":
 			out.Values[i] = ec._UserContactMethod_value(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "formattedValue":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._UserContactMethod_formattedValue(ctx, field, obj)
+				if res == graphql.Null {
+					invalid = true
+				}
+				return res
+			})
+		case "disabled":
+			out.Values[i] = ec._UserContactMethod_disabled(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
@@ -14637,6 +15670,10 @@ func (ec *executionContext) unmarshalNCreateEscalationPolicyStepInput2githubᚗc
 	return ec.unmarshalInputCreateEscalationPolicyStepInput(ctx, v)
 }
 
+func (ec *executionContext) unmarshalNCreateHeartbeatMonitorInput2githubᚗcomᚋtargetᚋgoalertᚋgraphql2ᚐCreateHeartbeatMonitorInput(ctx context.Context, v interface{}) (CreateHeartbeatMonitorInput, error) {
+	return ec.unmarshalInputCreateHeartbeatMonitorInput(ctx, v)
+}
+
 func (ec *executionContext) unmarshalNCreateIntegrationKeyInput2githubᚗcomᚋtargetᚋgoalertᚋgraphql2ᚐCreateIntegrationKeyInput(ctx context.Context, v interface{}) (CreateIntegrationKeyInput, error) {
 	return ec.unmarshalInputCreateIntegrationKeyInput(ctx, v)
 }
@@ -14759,6 +15796,56 @@ func (ec *executionContext) marshalNEscalationPolicyStep2ᚕgithubᚗcomᚋtarge
 	}
 	wg.Wait()
 	return ret
+}
+
+func (ec *executionContext) marshalNHeartbeatMonitor2githubᚗcomᚋtargetᚋgoalertᚋheartbeatᚐMonitor(ctx context.Context, sel ast.SelectionSet, v heartbeat.Monitor) graphql.Marshaler {
+	return ec._HeartbeatMonitor(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNHeartbeatMonitor2ᚕgithubᚗcomᚋtargetᚋgoalertᚋheartbeatᚐMonitor(ctx context.Context, sel ast.SelectionSet, v []heartbeat.Monitor) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		rctx := &graphql.ResolverContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNHeartbeatMonitor2githubᚗcomᚋtargetᚋgoalertᚋheartbeatᚐMonitor(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) unmarshalNHeartbeatMonitorState2githubᚗcomᚋtargetᚋgoalertᚋheartbeatᚐState(ctx context.Context, v interface{}) (heartbeat.State, error) {
+	tmp, err := graphql.UnmarshalString(v)
+	return heartbeat.State(tmp), err
+}
+
+func (ec *executionContext) marshalNHeartbeatMonitorState2githubᚗcomᚋtargetᚋgoalertᚋheartbeatᚐState(ctx context.Context, sel ast.SelectionSet, v heartbeat.State) graphql.Marshaler {
+	return graphql.MarshalString(string(v))
 }
 
 func (ec *executionContext) unmarshalNID2int(ctx context.Context, v interface{}) (int, error) {
@@ -15283,6 +16370,10 @@ func (ec *executionContext) unmarshalNScheduleTargetInput2githubᚗcomᚋtarget�
 	return ec.unmarshalInputScheduleTargetInput(ctx, v)
 }
 
+func (ec *executionContext) unmarshalNSendContactMethodVerificationInput2githubᚗcomᚋtargetᚋgoalertᚋgraphql2ᚐSendContactMethodVerificationInput(ctx context.Context, v interface{}) (SendContactMethodVerificationInput, error) {
+	return ec.unmarshalInputSendContactMethodVerificationInput(ctx, v)
+}
+
 func (ec *executionContext) marshalNService2githubᚗcomᚋtargetᚋgoalertᚋserviceᚐService(ctx context.Context, sel ast.SelectionSet, v service.Service) graphql.Marshaler {
 	return ec._Service(ctx, sel, &v)
 }
@@ -15581,6 +16672,10 @@ func (ec *executionContext) unmarshalNUpdateEscalationPolicyStepInput2githubᚗc
 	return ec.unmarshalInputUpdateEscalationPolicyStepInput(ctx, v)
 }
 
+func (ec *executionContext) unmarshalNUpdateHeartbeatMonitorInput2githubᚗcomᚋtargetᚋgoalertᚋgraphql2ᚐUpdateHeartbeatMonitorInput(ctx context.Context, v interface{}) (UpdateHeartbeatMonitorInput, error) {
+	return ec.unmarshalInputUpdateHeartbeatMonitorInput(ctx, v)
+}
+
 func (ec *executionContext) unmarshalNUpdateRotationInput2githubᚗcomᚋtargetᚋgoalertᚋgraphql2ᚐUpdateRotationInput(ctx context.Context, v interface{}) (UpdateRotationInput, error) {
 	return ec.unmarshalInputUpdateRotationInput(ctx, v)
 }
@@ -15804,6 +16899,10 @@ func (ec *executionContext) unmarshalNUserRole2githubᚗcomᚋtargetᚋgoalert�
 
 func (ec *executionContext) marshalNUserRole2githubᚗcomᚋtargetᚋgoalertᚋgraphql2ᚐUserRole(ctx context.Context, sel ast.SelectionSet, v UserRole) graphql.Marshaler {
 	return v
+}
+
+func (ec *executionContext) unmarshalNVerifyContactMethodInput2githubᚗcomᚋtargetᚋgoalertᚋgraphql2ᚐVerifyContactMethodInput(ctx context.Context, v interface{}) (VerifyContactMethodInput, error) {
+	return ec.unmarshalInputVerifyContactMethodInput(ctx, v)
 }
 
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {
@@ -16304,6 +17403,26 @@ func (ec *executionContext) unmarshalOCreateEscalationPolicyStepInput2ᚕgithub�
 	return res, nil
 }
 
+func (ec *executionContext) unmarshalOCreateHeartbeatMonitorInput2ᚕgithubᚗcomᚋtargetᚋgoalertᚋgraphql2ᚐCreateHeartbeatMonitorInput(ctx context.Context, v interface{}) ([]CreateHeartbeatMonitorInput, error) {
+	var vSlice []interface{}
+	if v != nil {
+		if tmp1, ok := v.([]interface{}); ok {
+			vSlice = tmp1
+		} else {
+			vSlice = []interface{}{v}
+		}
+	}
+	var err error
+	res := make([]CreateHeartbeatMonitorInput, len(vSlice))
+	for i := range vSlice {
+		res[i], err = ec.unmarshalNCreateHeartbeatMonitorInput2githubᚗcomᚋtargetᚋgoalertᚋgraphql2ᚐCreateHeartbeatMonitorInput(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
 func (ec *executionContext) unmarshalOCreateIntegrationKeyInput2ᚕgithubᚗcomᚋtargetᚋgoalertᚋgraphql2ᚐCreateIntegrationKeyInput(ctx context.Context, v interface{}) ([]CreateIntegrationKeyInput, error) {
 	var vSlice []interface{}
 	if v != nil {
@@ -16392,6 +17511,17 @@ func (ec *executionContext) marshalOEscalationPolicyStep2ᚖgithubᚗcomᚋtarge
 		return graphql.Null
 	}
 	return ec._EscalationPolicyStep(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOHeartbeatMonitor2githubᚗcomᚋtargetᚋgoalertᚋheartbeatᚐMonitor(ctx context.Context, sel ast.SelectionSet, v heartbeat.Monitor) graphql.Marshaler {
+	return ec._HeartbeatMonitor(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalOHeartbeatMonitor2ᚖgithubᚗcomᚋtargetᚋgoalertᚋheartbeatᚐMonitor(ctx context.Context, sel ast.SelectionSet, v *heartbeat.Monitor) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._HeartbeatMonitor(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOID2string(ctx context.Context, v interface{}) (string, error) {

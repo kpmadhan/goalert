@@ -2,7 +2,6 @@ import React, { Component } from 'react'
 import Card from '@material-ui/core/Card'
 import InfoIcon from '@material-ui/icons/Info'
 import List from '@material-ui/core/List'
-import Grid from '@material-ui/core/Grid'
 import ListItem from '@material-ui/core/ListItem'
 import ListItemText from '@material-ui/core/ListItemText'
 import Snackbar from '@material-ui/core/Snackbar'
@@ -296,61 +295,53 @@ export default class AlertsList extends Component {
     const showFavoritesWarning =
       snackbarOpen && noFavorites && !allServices && !serviceID && !isFirstLogin
 
-    return [
-      <CheckedAlertsFormControl
-        key='alerts-form-control'
-        data={data}
-        refetch={this.refetch}
-      />,
-      <Snackbar
-        key='snackbar'
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'left',
-        }}
-        open={showFavoritesWarning}
-        onClose={this.handleCloseSnackbar}
-      >
-        <SnackbarContent
-          className={classes.snackbar}
-          aria-describedby='client-snackbar'
-          message={
-            <span id='client-snackbar' className={classes.snackbarMessage}>
-              <InfoIcon className={classes.snackbarIcon} />
-              It looks like you have no favorited services. Visit your most used
-              services to set them as a favorite, or enable the filter to view
-              alerts for all services.
-            </span>
-          }
+    return (
+      <React.Fragment>
+        <CheckedAlertsFormControl data={data} refetch={this.refetch} />
+        <Snackbar
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'left',
+          }}
+          open={showFavoritesWarning}
+          onClose={this.handleCloseSnackbar}
+        >
+          <SnackbarContent
+            className={classes.snackbar}
+            aria-describedby='client-snackbar'
+            message={
+              <span id='client-snackbar' className={classes.snackbarMessage}>
+                <InfoIcon className={classes.snackbarIcon} />
+                It looks like you have no favorited services. Visit your most
+                used services to set them as a favorite, or enable the filter to
+                view alerts for all services.
+              </span>
+            }
+          />
+        </Snackbar>
+        <CreateAlertFab
+          showFavoritesWarning={showFavoritesWarning}
+          serviceID={serviceID}
+          transition={fullScreen && (showFavoritesWarning || actionComplete)}
         />
-      </Snackbar>,
-      <CreateAlertFab
-        key='create-alert'
-        showFavoritesWarning={showFavoritesWarning}
-        serviceID={serviceID}
-        transition={fullScreen && (showFavoritesWarning || actionComplete)}
-      />,
-      <Grid item container key='content'>
-        <Grid item container>
-          <Card key='data-card' style={{ width: '100%' }}>
-            <Hidden mdDown>
-              <AlertsListControls />
-            </Hidden>
-            <List id='alerts-list' style={{ padding: 0 }} data-cy='alerts-list'>
-              <InfiniteScroll
-                next={() => loadMore(this.getQueryData(offset))}
-                dataLength={len}
-                hasMore={hasMore}
-                loader={null}
-                scrollThreshold={(len - 20) / len}
-                style={{ overflow: 'hidden' }}
-              >
-                {content}
-              </InfiniteScroll>
-            </List>
-          </Card>
-        </Grid>
-      </Grid>,
-    ]
+        <Card style={{ width: '100%' }}>
+          <Hidden mdDown>
+            <AlertsListControls />
+          </Hidden>
+          <List id='alerts-list' style={{ padding: 0 }} data-cy='alerts-list'>
+            <InfiniteScroll
+              next={() => loadMore(this.getQueryData(offset))}
+              dataLength={len}
+              hasMore={hasMore}
+              loader={null}
+              scrollThreshold={(len - 20) / len}
+              style={{ overflow: 'hidden' }}
+            >
+              {content}
+            </InfiniteScroll>
+          </List>
+        </Card>
+      </React.Fragment>
+    )
   }
 }

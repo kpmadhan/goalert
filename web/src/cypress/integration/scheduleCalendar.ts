@@ -30,7 +30,7 @@ function testCalendar(screen: ScreenFormat) {
       cy.createRotation({
         count: 3,
         type: 'hourly',
-        shiftLength: 12,
+        shiftLength: 1,
       }).then(r => {
         rot = r
 
@@ -53,7 +53,27 @@ function testCalendar(screen: ScreenFormat) {
   })
 
   it('should view shifts', () => {
-    for (let i = 0; i < rot.users.length; i++) {
+    let check = rot.users.length
+    // TODO: This could still fail between 10pm and 11:59pm
+    // on the last day of the month (since the next day/shift isn't rendered)
+    //
+    // Once the calendar render fixes are in, it could still happen if the last day
+    // of the month is a Saturday.
+    //
+    // Until then, it will also fail on the last day of any month based on the current time.
+    //
+    // Proper fix would be to control the time (frontend and backend) when these tests are run
+    // to explicitly (and predictably) check these edge cases.
+
+    if (now.endOf('month').day === now.day) {
+      if (now.hour >= 11) {
+        check = 1
+      } else if (now.hour >= 10) {
+        check = 2
+      }
+    }
+
+    for (let i = 0; i < check; i++) {
       cy.get('body').should('contain', rot.users[i].name.split(' ')[0])
     }
   })
@@ -141,8 +161,10 @@ function testCalendar(screen: ScreenFormat) {
     cy.fixture('users').then(users => {
       cy.get('button[data-cy="add-override"]').click()
       cy.get('input[name=addUserID]').selectByLabel(users[0].name)
-      cy.get('button[type="submit"]').click()
-      cy.get('button[type="submit"]').should('not.exist')
+      cy.get('div[role=dialog]')
+        .contains('button', 'Submit')
+        .click()
+        .should('not.exist')
     })
   })
 
@@ -150,8 +172,10 @@ function testCalendar(screen: ScreenFormat) {
     cy.fixture('users').then(users => {
       cy.get('button[data-cy="add-override"]').click()
       cy.get('input[name=addUserID]').selectByLabel(users[0].name)
-      cy.get('button[type="submit"]').click()
-      cy.get('button[type="submit"]').should('not.exist')
+      cy.get('div[role=dialog]')
+        .contains('button', 'Submit')
+        .click()
+        .should('not.exist')
     })
   })
 
@@ -161,7 +185,9 @@ function testCalendar(screen: ScreenFormat) {
       .trigger('mouseover')
     cy.get('div[data-cy="shift-tooltip"]').should('be.visible')
     cy.get('button[data-cy="remove-override"]').click()
-    cy.get('button[type="submit"]').click()
-    cy.get('button[type="submit"]').should('not.exist')
+    cy.get('div[role=dialog]')
+      .contains('button', 'Submit')
+      .click()
+      .should('not.exist')
   })
 }

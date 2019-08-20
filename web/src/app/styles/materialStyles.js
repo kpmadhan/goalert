@@ -16,6 +16,7 @@ export const styles = theme => ({
   // Used to reduce padding between header and content
   cardHeader: {
     paddingBottom: 0,
+    margin: 0,
   },
   asLink: {
     color: 'blue',
@@ -26,7 +27,7 @@ export const styles = theme => ({
     display: 'inline-block',
   },
   cancelButton: {
-    color: theme.palette.secondary['500'],
+    color: 'rgba(0,0,0, 0.54)',
   },
   defaultFlex: {
     flex: '0 1 auto',
@@ -98,6 +99,10 @@ export const styles = theme => ({
       textDecoration: 'none',
     },
   },
+  navSelected: {
+    backgroundColor: '#ebebeb',
+    borderRight: '3px solid ' + theme.palette.primary['500'],
+  },
   // parent container must have position: relative
   topRightActions: {
     position: 'absolute',
@@ -114,5 +119,11 @@ export const styles = theme => ({
   // use on grid items except the last one per page
   mobileGridSpacing: {
     marginBottom: '1em',
+  },
+  srOnly: {
+    clip: 'rect(1px, 1px, 1px, 1px)',
+    overflow: 'hidden',
+    height: 1,
+    width: 1,
   },
 })

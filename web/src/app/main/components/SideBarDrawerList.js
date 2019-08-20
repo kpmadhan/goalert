@@ -28,6 +28,7 @@ import { CurrentUserAvatar } from '../../util/avatar'
 import { authLogout } from '../../actions'
 import { connect } from 'react-redux'
 import RequireConfig, { Config } from '../../util/RequireConfig'
+import NavSubMenu from './NavSubMenu'
 
 const navIcons = {
   Alerts: AlertsIcon,
@@ -48,10 +49,6 @@ const styles = theme => ({
   },
   logo: {
     padding: '0.5em',
-  },
-  navSelected: {
-    backgroundColor: '#ebebeb',
-    borderRight: '3px solid ' + theme.palette.primary['500'],
   },
   navIcon: {
     width: '1em',
@@ -116,6 +113,7 @@ export default class SideBarDrawerList extends React.PureComponent {
           primary={
             <Typography
               variant='subtitle1'
+              component='p'
               className={this.props.classes.listItemText}
             >
               {label}
@@ -129,11 +127,15 @@ export default class SideBarDrawerList extends React.PureComponent {
   renderAdmin() {
     const cfg = routeConfig.find(c => c.title === 'Admin')
 
-    return this.renderSidebarNavLink(
-      navIcons[cfg.title],
-      getPath(cfg),
-      cfg.title,
-      null,
+    return (
+      <NavSubMenu
+        parentIcon={navIcons[cfg.title]}
+        parentTitle={cfg.title}
+        path={getPath(cfg)}
+        subMenuRoutes={cfg.subRoutes}
+      >
+        {this.renderSidebarItem(navIcons[cfg.title], cfg.title)}
+      </NavSubMenu>
     )
   }
 
@@ -154,56 +156,70 @@ export default class SideBarDrawerList extends React.PureComponent {
     const { classes } = this.props
 
     return (
-      <List className={classes.list} data-cy='nav-list'>
-        <div className={classes.logoDiv}>
+      <React.Fragment>
+        <div aria-hidden className={classes.logoDiv}>
           <img
             className={classes.logo}
             height={32}
             src={require('../../public/goalert-alt-logo-scaled.png')}
+            alt=''
           />
         </div>
         <Divider />
+        <List role='navigation' className={classes.list} data-cy='nav-list'>
+          {routeConfig
+            .filter(cfg => cfg.nav !== false)
+            .map((cfg, idx) => {
+              if (cfg.subRoutes) {
+                return (
+                  <NavSubMenu
+                    key={idx}
+                    parentIcon={navIcons[cfg.title]}
+                    parentTitle={cfg.title}
+                    path={getPath(cfg)}
+                    subMenuRoutes={cfg.subRoutes}
+                  >
+                    {this.renderSidebarItem(navIcons[cfg.title], cfg.title)}
+                  </NavSubMenu>
+                )
+              }
+              return this.renderSidebarNavLink(
+                navIcons[cfg.title],
+                getPath(cfg),
+                cfg.title,
+                idx,
+              )
+            })}
+          <RequireConfig isAdmin>
+            <Divider aria-hidden />
+            {this.renderAdmin()}
+          </RequireConfig>
 
-        {routeConfig
-          .filter(cfg => cfg.nav !== false)
-          .map((cfg, idx) =>
-            this.renderSidebarNavLink(
-              navIcons[cfg.title],
-              getPath(cfg),
-              cfg.title,
-              idx,
-            ),
-          )}
-
-        <RequireConfig isAdmin>
-          <Divider />
-          {this.renderAdmin()}
-        </RequireConfig>
-
-        <Divider />
-        {this.renderSidebarNavLink(WizardIcon, '/wizard', 'Wizard')}
-        <Config>
-          {cfg =>
-            cfg['Feedback.Enable'] &&
-            this.renderFeedback(
-              cfg['Feedback.OverrideURL'] ||
-                'https://www.surveygizmo.com/s3/4106900/GoAlert-Feedback',
-            )
-          }
-        </Config>
-        {this.renderSidebarLink(
-          LogoutIcon,
-          '/api/v2/identity/logout',
-          'Logout',
-          {
-            onClick: e => {
-              e.preventDefault()
-              this.props.logout()
+          <Divider aria-hidden />
+          {this.renderSidebarNavLink(WizardIcon, '/wizard', 'Wizard')}
+          <Config>
+            {cfg =>
+              cfg['Feedback.Enable'] &&
+              this.renderFeedback(
+                cfg['Feedback.OverrideURL'] ||
+                  'https://www.surveygizmo.com/s3/4106900/GoAlert-Feedback',
+              )
+            }
+          </Config>
+          {this.renderSidebarLink(
+            LogoutIcon,
+            '/api/v2/identity/logout',
+            'Logout',
+            {
+              onClick: e => {
+                e.preventDefault()
+                this.props.logout()
+              },
             },
-          },
-        )}
-        {this.renderSidebarNavLink(CurrentUserAvatar, '/profile', 'Profile')}
-      </List>
+          )}
+          {this.renderSidebarNavLink(CurrentUserAvatar, '/profile', 'Profile')}
+        </List>
+      </React.Fragment>
     )
   }
 }

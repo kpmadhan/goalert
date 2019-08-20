@@ -5,7 +5,6 @@ import { graphql2Client } from '../apollo'
 import FlatList from '../lists/FlatList'
 import Query from '../util/Query'
 import Card from '@material-ui/core/Card'
-import CardContent from '@material-ui/core/CardContent'
 import CardHeader from '@material-ui/core/CardHeader'
 import { reorderList, calcNewActiveIndex } from './util'
 import { Mutation } from 'react-apollo'
@@ -15,6 +14,8 @@ import RotationSetActiveDialog from './RotationSetActiveDialog'
 import RotationUserDeleteDialog from './RotationUserDeleteDialog'
 import { DateTime } from 'luxon'
 import { UserAvatar } from '../util/avatar'
+import { withStyles } from '@material-ui/core'
+import { styles as globalStyles } from '../styles/materialStyles'
 
 const rotationUsersQuery = gql`
   query rotationUsers($id: ID!) {
@@ -36,6 +37,15 @@ const mutation = gql`
   }
 `
 
+const styles = theme => {
+  const { cardHeader } = globalStyles(theme)
+
+  return {
+    cardHeader,
+  }
+}
+
+@withStyles(styles)
 export default class RotationUserList extends React.PureComponent {
   static propTypes = {
     rotationID: p.string.isRequired,
@@ -47,17 +57,20 @@ export default class RotationUserList extends React.PureComponent {
   }
 
   render() {
+    const { classes } = this.props
     return (
       <React.Fragment>
         <Card>
-          <CardHeader title='Users' />
-          <CardContent>
-            <Query
-              query={rotationUsersQuery}
-              render={({ data }) => this.renderMutation(data)}
-              variables={{ id: this.props.rotationID }}
-            />
-          </CardContent>
+          <CardHeader
+            className={classes.cardHeader}
+            component='h3'
+            title='Users'
+          />
+          <Query
+            query={rotationUsersQuery}
+            render={({ data }) => this.renderMutation(data)}
+            variables={{ id: this.props.rotationID }}
+          />
         </Card>
         {this.state.deleteIndex !== null && (
           <RotationUserDeleteDialog
@@ -137,7 +150,7 @@ export default class RotationUserList extends React.PureComponent {
           highlight: index === activeUserIndex,
           icon: <UserAvatar userID={u.id} />,
           subText: handoff[index],
-          action: (
+          secondaryAction: (
             <OtherActions
               actions={[
                 {

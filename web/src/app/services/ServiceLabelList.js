@@ -66,7 +66,7 @@ export default class ServiceLabelList extends React.PureComponent {
       .map(label => ({
         title: label.key,
         subText: label.value,
-        action: (
+        secondaryAction: (
           <OtherActions
             actions={[
               {
@@ -98,7 +98,10 @@ export default class ServiceLabelList extends React.PureComponent {
             <CardContent>{this.renderQuery()}</CardContent>
           </Card>
         </Grid>
-        <CreateFAB onClick={() => this.setState({ create: true })} />
+        <CreateFAB
+          onClick={() => this.setState({ create: true })}
+          title='Add Label'
+        />
         {this.state.create && (
           <ServiceLabelSetDialog
             serviceID={this.props.serviceID}

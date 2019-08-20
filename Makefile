@@ -25,6 +25,7 @@ LD_FLAGS+=-X github.com/target/goalert/version.buildDate=$(BUILD_DATE)
 
 export CY_ACTION = open
 export CY_BROWSER = chrome
+export RUNJSON_PROD_FILE = devtools/runjson/localdev-cypress-prod.json
 
 ifdef LOG_DIR
 RUNJSON_ARGS += -logs=$(LOG_DIR)
@@ -34,6 +35,10 @@ export CGO_ENABLED = 0
 export PATH := $(PWD)/bin:$(PATH)
 export GOOS = $(shell go env GOOS)
 export GOALERT_DB_URL_NEXT = $(DB_URL_NEXT)
+
+ifeq ($(shell test -d vendor && echo -n yes), yes)
+export GOFLAGS=-mod=vendor
+endif
 
 ifdef BUNDLE
 	GOFILES += web/inline_data_gen.go
@@ -63,9 +68,9 @@ cy-wide: cypress web/src/build/vendorPackages.dll.js
 cy-mobile: cypress web/src/build/vendorPackages.dll.js
 	CYPRESS_viewportWidth=375 CYPRESS_viewportHeight=667 bin/runjson $(RUNJSON_ARGS) <devtools/runjson/localdev-cypress.json
 cy-wide-prod: web/inline_data_gen.go cypress
-	CYPRESS_viewportWidth=1440 CYPRESS_viewportHeight=900 CY_ACTION=$(CY_ACTION) bin/runjson $(RUNJSON_ARGS) <devtools/runjson/localdev-cypress-prod.json
+	CYPRESS_viewportWidth=1440 CYPRESS_viewportHeight=900 CY_ACTION=$(CY_ACTION) bin/runjson $(RUNJSON_ARGS) <$(RUNJSON_PROD_FILE)
 cy-mobile-prod: web/inline_data_gen.go cypress
-	CYPRESS_viewportWidth=375 CYPRESS_viewportHeight=667 CY_ACTION=$(CY_ACTION) bin/runjson $(RUNJSON_ARGS) <devtools/runjson/localdev-cypress-prod.json
+	CYPRESS_viewportWidth=375 CYPRESS_viewportHeight=667 CY_ACTION=$(CY_ACTION) bin/runjson $(RUNJSON_ARGS) <$(RUNJSON_PROD_FILE)
 cy-wide-prod-run: web/inline_data_gen.go cypress
 	make cy-wide-prod CY_ACTION=run
 cy-mobile-prod-run: web/inline_data_gen.go cypress
@@ -105,7 +110,7 @@ graphql2/generated.go: graphql2/schema.graphql graphql2/gqlgen.yml
 generate:
 	go generate ./...
 
-smoketest: generate bin/goalert
+smoketest: install bin/goalert
 	(cd smoketest && go test -timeout 20m)
 
 test-migrations: migrate/inline_data_gen.go bin/goalert
@@ -131,12 +136,9 @@ web/src/node_modules: web/src/node_modules/.bin/cypress
 web/src/node_modules/.bin/cypress: web/src/yarn.lock
 	(cd web/src && yarn --no-progress --silent --frozen-lockfile && touch node_modules/.bin/cypress)
 
-web/src/build/index.html: web/src/webpack.prod.config.js web/src/node_modules $(shell find ./web/src/app -type f )
-	(cd web/src && node_modules/.bin/webpack --config webpack.prod.config.js)
-	echo "" >>web/src/build/index.html
-	echo "<!-- Version: $(GIT_VERSION) -->" >>web/src/build/index.html
-	echo "<!-- GitCommit: $(GIT_COMMIT) ($(GIT_TREE)) -->" >>web/src/build/index.html
-	echo "<!-- BuildDate: $(BUILD_DATE) -->" >>web/src/build/index.html
+web/src/build/index.html: web/src/webpack.prod.config.js web/src/yarn.lock $(shell find ./web/src/app -type f )
+	rm -rf web/src/build/static
+	(cd web/src && yarn --no-progress --silent --frozen-lockfile && node_modules/.bin/webpack --config webpack.prod.config.js)
 
 web/inline_data_gen.go: web/src/build/index.html $(CFGPARAMS) $(INLINER)
 	go generate ./web

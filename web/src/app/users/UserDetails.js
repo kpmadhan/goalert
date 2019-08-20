@@ -14,6 +14,7 @@ import UserContactMethodCreateDialog from './UserContactMethodCreateDialog'
 import UserNotificationRuleCreateDialog from './UserNotificationRuleCreateDialog'
 import Typography from '@material-ui/core/Typography'
 import withStyles from '@material-ui/core/styles/withStyles'
+import UserContactMethodVerificationDialog from './UserContactMethodVerificationDialog'
 
 const styles = theme => ({
   profileImage: {
@@ -62,6 +63,7 @@ export default class UserDetails extends React.PureComponent {
   state = {
     createCM: false,
     createNR: false,
+    showVerifyDialogByID: null,
   }
 
   render() {
@@ -98,7 +100,21 @@ export default class UserDetails extends React.PureComponent {
         {this.state.createCM && (
           <UserContactMethodCreateDialog
             userID={this.props.userID}
-            onClose={() => this.setState({ createCM: false })}
+            onClose={result => {
+              this.setState({
+                createCM: false,
+                showVerifyDialogByID:
+                  result && result.contactMethodID
+                    ? result.contactMethodID
+                    : null,
+              })
+            }}
+          />
+        )}
+        {this.state.showVerifyDialogByID && (
+          <UserContactMethodVerificationDialog
+            contactMethodID={this.state.showVerifyDialogByID}
+            onClose={() => this.setState({ showVerifyDialogByID: null })}
           />
         )}
         {this.state.createNR && (
@@ -118,7 +134,11 @@ export default class UserDetails extends React.PureComponent {
               />
               <Typography
                 variant='caption'
-                style={{ textAlign: 'center', paddingTop: '0.5em' }}
+                style={{
+                  textAlign: 'center',
+                  paddingTop: '0.5em',
+                  display: 'block',
+                }}
               >
                 Provided by{' '}
                 <a href='https://gravatar.com' target='_blank'>

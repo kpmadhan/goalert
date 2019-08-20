@@ -18,6 +18,7 @@ const query = gql`
         id
         name
         description
+        isFavorite
       }
       pageInfo {
         hasNextPage
@@ -31,12 +32,15 @@ class ScheduleList extends React.PureComponent {
     return (
       <SimpleListPage
         query={query}
+        variables={{ input: { favoritesFirst: true } }}
         mapDataNode={n => ({
           title: n.name,
           subText: n.description,
           url: n.id,
+          isFavorite: n.isFavorite,
         })}
         createForm={<ScheduleCreateDialog />}
+        createLabel='Schedule'
       />
     )
   }

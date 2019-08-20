@@ -8,7 +8,29 @@ import Typography from '@material-ui/core/Typography'
 import withStyles from '@material-ui/core/styles/withStyles'
 import CloseIcon from '@material-ui/icons/Close'
 import DropDownMenu from '../../dialogs/components/DropDownMenu'
-import { styles } from '../../styles/materialStyles'
+import { styles as globalStyles } from '../../styles/materialStyles'
+import { DialogContent } from '@material-ui/core'
+
+const styles = theme => {
+  const { topRightActions } = globalStyles(theme)
+
+  return {
+    appBar: {
+      marginBottom: '1em',
+    },
+    appBarTitle: {
+      fontSize: '1.2em',
+      flex: 1,
+    },
+    subtitle: {
+      overflowY: 'unset',
+    },
+    topRightActions,
+    wideScreenTitle: {
+      paddingBottom: 0,
+    },
+  }
+}
 
 /**
  * Renders a fullscreen dialog with an app bar if on a small
@@ -21,6 +43,7 @@ export default class DialogTitleWrapper extends Component {
     closeIcon: p.object,
     toolbarItems: p.array, // list of JSX items to display on the toolbar
     title: p.string.isRequired,
+    subTitle: p.string,
     onClose: p.func,
     options: p.array, // list of options to display as list items from option icon
   }
@@ -33,6 +56,7 @@ export default class DialogTitleWrapper extends Component {
       toolbarItems,
       onClose,
       options,
+      subTitle,
       title,
     } = this.props
 
@@ -56,23 +80,40 @@ export default class DialogTitleWrapper extends Component {
       )
     }
 
+    let subtitle
+    if (subTitle) {
+      subtitle = (
+        <DialogContent className={classes.subtitle}>
+          <Typography variant='subtitle1' component='p'>
+            {subTitle}
+          </Typography>
+        </DialogContent>
+      )
+    }
+
     if (fullScreen) {
       return (
-        <AppBar position='sticky' style={{ marginBottom: '1em' }}>
-          <Toolbar>
-            {closeButton}
-            <Typography color='inherit' style={{ fontSize: '1.2em', flex: 1 }}>
-              {title}
-            </Typography>
-            {toolbarItems}
-            {menu}
-          </Toolbar>
-        </AppBar>
+        <React.Fragment>
+          <AppBar position='sticky' className={classes.appBar}>
+            <Toolbar>
+              {closeButton}
+              <Typography color='inherit' className={classes.appBarTitle}>
+                {title}
+              </Typography>
+              {toolbarItems}
+              {menu}
+            </Toolbar>
+          </AppBar>
+          {subtitle}
+        </React.Fragment>
       )
     } else {
       return (
         <React.Fragment>
-          <DialogTitle key='title'>{title}</DialogTitle>
+          <DialogTitle className={classes.wideScreenTitle} key='title'>
+            {title}
+          </DialogTitle>
+          {subtitle}
           {menu}
         </React.Fragment>
       )
